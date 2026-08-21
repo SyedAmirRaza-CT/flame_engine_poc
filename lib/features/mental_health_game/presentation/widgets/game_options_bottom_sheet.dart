@@ -20,92 +20,94 @@ class GameOptionsBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            "Game Options",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          // Interaction Options
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Material(
+      color: Colors.white,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              _OptionButton(
-                icon: Icons.waves,
-                label: "Bath",
-                onTap: () {
-                  context.read<BirdProvider>().bath();
-                  game.bathBird();
-                  Navigator.pop(context);
-                },
+              const Text(
+                "Game Options",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          const Divider(height: 32),
-          const Text("Change Background", style: TextStyle(fontWeight: FontWeight.w500)),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 80,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: GameConstants.backgrounds.map((bg) {
-                return _BackgroundThumb(
-                  name: bg['name']!,
-                  imagePath: bg['asset']!,
-                  onTap: () {
-                    context.read<MentalHealthProvider>().setBackground(bg['path']!);
-                    game.changeBackground(bg['path']!);
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-          const Divider(height: 32),
-          const Text("Change Clothes", style: TextStyle(fontWeight: FontWeight.w500)),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: GameConstants.clothing.map((c) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ActionChip(
-                    label: Text(c['name']!),
-                    onPressed: () {
-                      context.read<BirdProvider>().setClothing(c['asset']!, c['name']!);
+              const SizedBox(height: 20),
+              // Interaction Options
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _OptionButton(
+                    icon: Icons.waves,
+                    label: "Bath",
+                    onTap: () {
+                      context.read<BirdProvider>().bath();
+                      game.bathBird();
                       Navigator.pop(context);
                     },
                   ),
-                );
-              }).toList(),
-            ),
+                ],
+              ),
+              const Divider(height: 32),
+              const Text("Change Background", style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 80,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: GameConstants.backgrounds.map((bg) {
+                    return _BackgroundThumb(
+                      name: bg['name']!,
+                      imagePath: bg['asset']!,
+                      onTap: () {
+                        context.read<MentalHealthProvider>().setBackground(bg['path']!);
+                        game.changeBackground(bg['path']!);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              const Divider(height: 32),
+              const Text("Change Clothes", style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: GameConstants.clothing.map((c) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ActionChip(
+                        label: Text(c['name']!),
+                        onPressed: () {
+                          context.read<BirdProvider>().setClothing(c['asset']!, c['name']!);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const Divider(height: 32),
+              const Text("Settings", style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 12),
+              Consumer<MentalHealthProvider>(
+                builder: (context, provider, child) {
+                  return SwitchListTile(
+                    title: const Text("Show Collision Hitboxes", style: TextStyle(fontSize: 14)),
+                    value: provider.showDebugHitboxes,
+                    onChanged: (_) => provider.toggleDebugHitboxes(),
+                    secondary: const Icon(Icons.bug_report, color: Colors.orange),
+                    dense: true,
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
-          const Divider(height: 32),
-          const Text("Settings", style: TextStyle(fontWeight: FontWeight.w500)),
-          const SizedBox(height: 12),
-          Consumer<MentalHealthProvider>(
-            builder: (context, provider, child) {
-              return SwitchListTile(
-                title: const Text("Show Collision Hitboxes", style: TextStyle(fontSize: 14)),
-                value: provider.showDebugHitboxes,
-                onChanged: (_) => provider.toggleDebugHitboxes(),
-                secondary: const Icon(Icons.bug_report, color: Colors.orange),
-                dense: true,
-              );
-            },
-          ),
-          const SizedBox(height: 20),
-        ],
+        ),
       ),
     );
   }

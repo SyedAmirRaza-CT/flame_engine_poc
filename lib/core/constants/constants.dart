@@ -2,7 +2,7 @@ class GameConstants {
   static const double worldWidth = 3840;
   static const double worldHeight = 3840;
 
-  static const double birdWalkSpeed = 100.0;
+  static const double birdWalkSpeed = 300.0;
   static const double birdRunSpeed = 200.0;
   static const double birdFlySpeed = 300.0;
 
@@ -20,14 +20,14 @@ class GameConstants {
 
   static const double pondX = 1920.0;
   static const double pondY = 1920.0;
-  static const double pondRadius = 150.0;
+  static const double pondRadius = 400.0;
 
   static const String birdNameKey = 'bird_name';
   static const String birdProfileKey = 'bird_profile';
   static const String backgroundKey = 'game_background';
 
-  static const double pondWidth = 360;
-  static const double pondHeight = 260;
+  static const double pondWidth = 800;
+  static const double pondHeight = 600;
 
   // New Locations
   static const double feedingX = 400.0;
@@ -56,6 +56,11 @@ class GameConstants {
   // How many real-world seconds represent a full 24-hour cycle in game.
   // Default: 600 seconds (10 minutes) = 1 Game Day.
   static const double fullCycleSeconds = 600.0; 
+
+  // Ground Constraints (To keep bird out of sky and corners)
+  static const double groundTopY = worldHeight * 0.33; // Top 1/3 is sky
+  static const double groundBottomY = worldHeight * 0.95; // Small padding at bottom
+  static const double groundSidePadding = 150.0; // Avoid corner trees/bushes
 
   static const List<Map<String, String>> backgrounds = [
     {
@@ -87,7 +92,7 @@ class GameConstants {
     },
     {
       'name': 'Red Vest',
-      'asset': 'birds/flying_clothes.png',
+      'asset': 'birds/walking_clothes.png',
     },
   ];
 }

@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flame/components.dart';
+import 'package:mental_health_game/core/utils/game_utils.dart';
+import 'package:mental_health_game/features/mental_health_game/presentation/game/controllers/bird_ai_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:mental_health_game/features/mental_health_game/presentation/providers/bird_provider.dart';
 import '../mental_health_game.dart';
@@ -15,6 +17,14 @@ class BirdClothingComponent extends SpriteAnimationComponent with HasGameReferen
   void update(double dt) {
     super.update(dt);
     
+    // Hide clothing if bird is bathing (to avoid index mismatch/visual bugs)
+    if (bird.current == BirdState.bathing) {
+      opacity = 0;
+      return;
+    } else {
+      opacity = 1;
+    }
+
     // Sync position and size to parent bird
     size = bird.size;
     position = bird.size / 2; 
@@ -39,29 +49,16 @@ class BirdClothingComponent extends SpriteAnimationComponent with HasGameReferen
   }
 
   Future<void> _loadClothingAnimation(String assetPath) async {
-    final image = await game.images.load(assetPath);
+    // The asset path coming from constants is e.g. 'birds/walking_clothes.png'
+    // GameUtils.loadSpriteAnimation handles PNG/SVG based on extension
+    animation = await GameUtils.loadSpriteAnimation(
+      game,
+      assetPath,
+      columns: 3,
+      rows: 3,
+      stepTime: 1 / 10,
+    );
     
-    // The asset 'birds/flying_clothes.png' is already correctly colored.
     paint = Paint();
-
-    const columns = 3;
-    const rows = 3;
-    final frameWidth = image.width / columns;
-    final frameHeight = image.height / rows;
-
-    final frames = <SpriteAnimationFrameData>[];
-    for (int row = 0; row < rows; row++) {
-      for (int column = 0; column < columns; column++) {
-        frames.add(
-          SpriteAnimationFrameData(
-            srcPosition: Vector2(column * frameWidth, row * frameHeight),
-            srcSize: Vector2(frameWidth, frameHeight),
-            stepTime: 1 / 10,
-          ),
-        );
-      }
-    }
-
-    animation = SpriteAnimation.fromFrameData(image, SpriteAnimationData(frames));
   }
 }

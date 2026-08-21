@@ -114,13 +114,40 @@ class MentalHealthGame extends FlameGame
   void onDoubleTapDown(DoubleTapDownEvent event) {
     final worldPosition = camera.viewfinder.parentToLocal(event.localPosition);
     
-    // Command the bird to fly to the double-tapped location
-    bird.ai.forceState(
-      BirdState.flying,
-      target: worldPosition,
-      speed: GameConstants.birdFlySpeed,
-      duration: 10.0,
-    );
+    // Check if the double-tap was on the pond
+    final componentsAtPoint = world.componentsAtPoint(worldPosition);
+    final tappedPond = componentsAtPoint.whereType<PondComponent>().firstOrNull;
+
+    if (tappedPond != null) {
+      // Command the bird to walk to the center of the pond for a bath
+      bird.currentIntent = BirdAreaIntent.pond;
+      bird.ai.forceState(
+        BirdState.walking,
+        target: tappedPond.position, // Since anchor is center, position is the center
+        speed: GameConstants.birdWalkSpeed,
+        duration: 20.0,
+      );
+    } else {
+      // Clamp the call position to the valid ground area
+      final clampedX = worldPosition.x.clamp(
+        GameConstants.groundSidePadding, 
+        GameConstants.worldWidth - GameConstants.groundSidePadding,
+      );
+      final clampedY = worldPosition.y.clamp(
+        GameConstants.groundTopY, 
+        GameConstants.groundBottomY,
+      );
+      final targetPos = Vector2(clampedX, clampedY);
+
+      // Standard call to location
+      bird.currentIntent = BirdAreaIntent.call;
+      bird.ai.forceState(
+        BirdState.walking,
+        target: targetPos,
+        speed: GameConstants.birdWalkSpeed,
+        duration: 15.0,
+      );
+    }
   }
 
   double _startZoom = 0.1;

@@ -114,11 +114,9 @@ class _MiniMapPainter extends CustomPainter {
     
     // Pond
     final pondPaint = Paint()..color = Colors.blue.withValues(alpha: 0.6);
-    // Use pond.position which is the top-left, so we calculate center for drawCircle
-    final pondPos = Offset(
-      (pond.position.x + pond.size.x / 2) * scale,
-      (pond.position.y + pond.size.y / 2) * scale,
-    );
+    // Component positions are in world coordinates.
+    // Since we centered the pond anchor, pond.position is the center.
+    final pondPos = Offset(pond.position.x * scale, pond.position.y * scale);
     canvas.drawCircle(pondPos, (pond.size.x / 2) * scale, pondPaint);
 
     // 3. Draw Bird (Small dot)
