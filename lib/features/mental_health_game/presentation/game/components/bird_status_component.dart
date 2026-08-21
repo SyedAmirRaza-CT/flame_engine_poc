@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import '../controllers/bird_ai_controller.dart';
 import 'bird_component.dart';
 
 class BirdStatusComponent extends PositionComponent with HasGameReference {
@@ -30,11 +31,9 @@ class BirdStatusComponent extends PositionComponent with HasGameReference {
     final state = bird.ai.currentState;
     
     // Check AI states for immediate feedback
-    if (state.name == 'eating') symbols.add('🍎');
-    if (state.name == 'bathing') symbols.add('💧');
+    if (state == BirdState.bathing) symbols.add('💧');
     
     // We will ask the bird component to provide the current profile stats
-    // I'll update BirdComponent to store a local copy of stats for rendering
     final profile = bird.currentProfile;
     if (profile != null) {
       if (profile.hunger > 70) symbols.add('🍕');
