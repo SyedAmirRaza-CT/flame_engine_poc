@@ -1,5 +1,5 @@
 class GameConstants {
-  static const double worldWidth = 1000;
+  static const double worldWidth = 2000;
   static const double worldHeight = 2000;
 
   static const double birdWalkSpeed = 100.0;
@@ -24,4 +24,13 @@ class GameConstants {
 
   static const String birdNameKey = 'bird_name';
   static const String birdProfileKey = 'bird_profile';
+
+  static const double pondWidth = 360;
+  static const double pondHeight = 260;
+
+  // Trees
+  static const int treeCount = 18;
+  static const double treeSize = 150;
+  static const double treePadding = 80;
+  static const double treeSpacing = 110;
 }

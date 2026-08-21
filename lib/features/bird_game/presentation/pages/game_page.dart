@@ -32,7 +32,7 @@ class _GamePageState extends ConsumerState<GamePage> {
     return Scaffold(
       body: Stack(
         children: [
-          GameWidget(game: _game),
+          GameWidget(game: _game, autofocus: true),
           
           // // UI Components
           // const SafeArea(
