@@ -66,7 +66,7 @@ class MentalHealthGame extends FlameGame
 
 
     // 5. The Bird
-    bird = BirdComponent()
+    bird = BirdComponent(key: ComponentKey.named('bird'))
       ..position = Vector2(
         (GameConstants.worldWidth / 2 )- 150,
         (GameConstants.worldHeight / 2) + 150,
@@ -168,24 +168,16 @@ class MentalHealthGame extends FlameGame
   // ACTIONS (Called from UI)
   // ==========================================================
 
-  void feedBird() {
-    bird.onFeed();
-  }
-
   void bathBird() {
     bird.onBath();
   }
 
-  void playBird() {
-    bird.onPlay();
-  }
-
-  void sleepBird() {
-    bird.onSleep();
-  }
-
   Future<void> changeBackground(String path) async {
     await park.updateBackground(path);
+  }
+
+  void forceCameraClamping() {
+    _keepCameraInsideWorld();
   }
 
   // ==========================================================

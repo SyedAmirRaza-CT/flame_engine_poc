@@ -39,36 +39,11 @@ class GameOptionsBottomSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _OptionButton(
-                icon: Icons.apple,
-                label: "Feed",
-                onTap: () {
-                  context.read<BirdProvider>().feed();
-                  game.feedBird();
-                  Navigator.pop(context);
-                },
-              ),
-              _OptionButton(
                 icon: Icons.waves,
                 label: "Bath",
                 onTap: () {
                   context.read<BirdProvider>().bath();
                   game.bathBird();
-                  Navigator.pop(context);
-                },
-              ),
-              _OptionButton(
-                icon: Icons.sports_soccer,
-                label: "Play",
-                onTap: () {
-                  game.playBird();
-                  Navigator.pop(context);
-                },
-              ),
-              _OptionButton(
-                icon: Icons.bed,
-                label: "Sleep",
-                onTap: () {
-                  game.sleepBird();
                   Navigator.pop(context);
                 },
               ),

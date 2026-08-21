@@ -7,6 +7,8 @@ class WorldComponent extends PositionComponent {
   Sprite? _backgroundSprite;
   String? _currentBackgroundPath;
 
+  Sprite? get backgroundSprite => _backgroundSprite;
+
   @override
   Future<void> onLoad() async {
     size = Vector2(

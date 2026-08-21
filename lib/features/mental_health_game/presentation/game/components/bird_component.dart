@@ -13,7 +13,7 @@ import 'pond_component.dart';
 import 'bird_status_component.dart';
 import 'bird_clothing_component.dart';
 
-enum BirdAreaIntent { none, pond, feeding, playground, sleeping }
+enum BirdAreaIntent { none, pond }
 
 class BirdComponent extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameReference<MentalHealthGame> {
@@ -27,7 +27,7 @@ class BirdComponent extends SpriteAnimationComponent
   // If 'none', it's just autonomous wandering and should avoid special areas.
   BirdAreaIntent currentIntent = BirdAreaIntent.none;
 
-  BirdComponent() : super(anchor: Anchor.center);
+  BirdComponent({super.key}) : super(anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
@@ -220,20 +220,6 @@ class BirdComponent extends SpriteAnimationComponent
   Vector2? get target => _target;
 
   // ============================================================
-  // FEED
-  // ============================================================
-
-  void onFeed() {
-    currentIntent = BirdAreaIntent.feeding;
-    ai.forceState(
-      BirdState.flying,
-      target: Vector2(GameConstants.feedingX, GameConstants.feedingY),
-      speed: GameConstants.birdFlySpeed,
-      duration: 15.0,
-    );
-  }
-
-  // ============================================================
   // BATH
   // ============================================================
 
@@ -242,26 +228,6 @@ class BirdComponent extends SpriteAnimationComponent
     ai.forceState(
       BirdState.flying,
       target: Vector2(GameConstants.pondX, GameConstants.pondY),
-      speed: GameConstants.birdFlySpeed,
-      duration: 15.0,
-    );
-  }
-
-  void onPlay() {
-    currentIntent = BirdAreaIntent.playground;
-    ai.forceState(
-      BirdState.walking,
-      target: Vector2(GameConstants.playX, GameConstants.playY),
-      speed: GameConstants.birdRunSpeed,
-      duration: 15.0,
-    );
-  }
-
-  void onSleep() {
-    currentIntent = BirdAreaIntent.sleeping;
-    ai.forceState(
-      BirdState.flying,
-      target: Vector2(GameConstants.sleepX, GameConstants.sleepY),
       speed: GameConstants.birdFlySpeed,
       duration: 15.0,
     );

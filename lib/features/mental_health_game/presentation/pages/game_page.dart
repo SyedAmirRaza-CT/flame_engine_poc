@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../game/mental_health_game.dart';
 import '../widgets/bird_stats_widget.dart';
 import '../widgets/game_options_bottom_sheet.dart';
+import '../widgets/mini_map_widget.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -27,11 +28,19 @@ class _GamePageState extends State<GamePage> {
         children: [
           GameWidget(game: _game, autofocus: true),
           
-          // UI Components (Stats in corner)
+          // UI Components (Stats in top-left)
           const SafeArea(
             child: Align(
-              alignment: Alignment.topRight,
+              alignment: Alignment.topLeft,
               child: BirdStatsWidget(),
+            ),
+          ),
+
+          // Mini Map (Top-right)
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: MiniMapWidget(game: _game),
             ),
           ),
 
