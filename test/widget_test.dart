@@ -5,7 +5,8 @@ import 'package:mental_health_game/main.dart';
 import 'package:mental_health_game/features/mental_health_game/data/datasources/bird_local_data_source.dart';
 import 'package:mental_health_game/features/mental_health_game/data/repositories/bird_repository_impl.dart';
 import 'package:mental_health_game/features/mental_health_game/domain/repositories/bird_repository.dart';
-import 'package:mental_health_game/features/mental_health_game/presentation/controllers/bird_controller.dart';
+import 'package:mental_health_game/features/mental_health_game/presentation/providers/bird_provider.dart';
+import 'package:mental_health_game/features/mental_health_game/presentation/providers/mental_health_provider.dart';
 
 void main() {
   testWidgets('App starts and shows name entry', (WidgetTester tester) async {
@@ -26,18 +27,21 @@ void main() {
               localDataSource: context.read<BirdLocalDataSource>(),
             ),
           ),
-          ChangeNotifierProvider<BirdController>(
-            create: (context) => BirdController(
+          ChangeNotifierProvider<BirdProvider>(
+            create: (context) => BirdProvider(
               repository: context.read<BirdRepository>(),
             ),
           ),
+          ChangeNotifierProvider<MentalHealthProvider>(
+            create: (context) => MentalHealthProvider(),
+          ),
         ],
-        child: const MentalHealthLifeGameApp(),
+        child: const MentalHealthGameApp(),
       ),
     );
 
     await tester.pumpAndSettle();
 
-    expect(find.text("What's your mental_health's name?"), findsOneWidget);
+    expect(find.text("What's your bird's name?"), findsOneWidget);
   });
 }

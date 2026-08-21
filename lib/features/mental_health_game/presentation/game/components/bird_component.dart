@@ -1,24 +1,31 @@
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../core/constants/constants.dart';
+
+import 'package:mental_health_game/features/mental_health_game/domain/entities/bird_profile.dart';
+import 'package:mental_health_game/features/mental_health_game/presentation/providers/bird_provider.dart';
+
 import '../mental_health_game.dart';
 import '../controllers/bird_ai_controller.dart';
 import 'pond_component.dart';
-import 'tree_component.dart';
+import 'bird_status_component.dart';
+import 'bird_clothing_component.dart';
+
+enum BirdAreaIntent { none, pond, feeding, playground, sleeping }
 
 class BirdComponent extends SpriteAnimationComponent
-    with
-        CollisionCallbacks,
-        DragCallbacks,
-        HasGameReference<MentalHealthGame> {
+    with CollisionCallbacks, HasGameReference<MentalHealthGame> {
   Vector2? _target;
   double _speed = 0;
 
   late BirdAIController ai;
+  BirdProfile? currentProfile;
 
-  bool _isDragging = false;
+  // The intent with which the bird is moving.
+  // If 'none', it's just autonomous wandering and should avoid special areas.
+  BirdAreaIntent currentIntent = BirdAreaIntent.none;
 
   BirdComponent() : super(anchor: Anchor.center);
 
@@ -28,21 +35,15 @@ class BirdComponent extends SpriteAnimationComponent
     // BIRD HITBOX
     // ----------------------------------------------------------
     //
-    // Don't use the entire mental_health image as collision area.
-    // Keep the hitbox smaller so the mental_health doesn't hit trees
+    // Don't use the entire bird image as collision area.
+    // Keep the hitbox smaller so the bird doesn't hit trees
     // when its transparent/outer sprite area touches them.
     //
 
     add(
       RectangleHitbox(
-        size: Vector2(
-          size.x * 0.45,
-          size.y * 0.45,
-        ),
-        position: Vector2(
-          size.x * 0.275,
-          size.y * 0.30,
-        ),
+        size: Vector2(size.x * 0.45, size.y * 0.45),
+        position: Vector2(size.x * 0.275, size.y * 0.30),
       ),
     );
 
@@ -53,6 +54,18 @@ class BirdComponent extends SpriteAnimationComponent
     ai = BirdAIController(this);
 
     add(ai);
+
+    // ----------------------------------------------------------
+    // STATUS INDICATORS
+    // ----------------------------------------------------------
+
+    add(BirdStatusComponent(this));
+
+    // ----------------------------------------------------------
+    // CLOTHING OVERLAY
+    // ----------------------------------------------------------
+
+    add(BirdClothingComponent(this));
 
     // ----------------------------------------------------------
     // ANIMATION
@@ -66,126 +79,33 @@ class BirdComponent extends SpriteAnimationComponent
   // ============================================================
 
   Future<void> _loadAnimations() async {
-    final image = await game.images.load(
-      'mental_healths/flying.png',
-    );
+    final image = await game.images.load('birds/flying.png');
 
     const columns = 3;
     const rows = 3;
 
-    final frameWidth =
-        image.width / columns;
+    final frameWidth = image.width / columns;
 
-    final frameHeight =
-        image.height / rows;
+    final frameHeight = image.height / rows;
 
-    final frames =
-    <SpriteAnimationFrameData>[];
+    final frames = <SpriteAnimationFrameData>[];
 
     for (int row = 0; row < rows; row++) {
-      for (int column = 0;
-      column < columns;
-      column++) {
+      for (int column = 0; column < columns; column++) {
         frames.add(
           SpriteAnimationFrameData(
-            srcPosition: Vector2(
-              column * frameWidth,
-              row * frameHeight,
-            ),
-            srcSize: Vector2(
-              frameWidth,
-              frameHeight,
-            ),
+            srcPosition: Vector2(column * frameWidth, row * frameHeight),
+            srcSize: Vector2(frameWidth, frameHeight),
             stepTime: 1 / 10,
           ),
         );
       }
     }
 
-    animation =
-        SpriteAnimation.fromFrameData(
-          image,
-          SpriteAnimationData(frames),
-        );
-  }
-
-  // ============================================================
-  // DRAG START
-  // ============================================================
-
-  @override
-  void onDragStart(
-      DragStartEvent event,
-      ) {
-    super.onDragStart(event);
-
-    _isDragging = true;
-
-    // Stop automatic movement.
-    stopMoving();
-
-    // Stop current AI state.
-    ai.forceState(
-      BirdState.idle,
+    animation = SpriteAnimation.fromFrameData(
+      image,
+      SpriteAnimationData(frames),
     );
-  }
-
-  // ============================================================
-  // DRAG UPDATE
-  // ============================================================
-
-  @override
-  void onDragUpdate(
-      DragUpdateEvent event,
-      ) {
-    super.onDragUpdate(event);
-
-    if (!_isDragging) {
-      return;
-    }
-
-    // IMPORTANT:
-    //
-    // Use canvasDelta instead of localDelta.
-    //
-    // This works correctly with camera zoom.
-    //
-
-    position += event.canvasDelta;
-
-    _keepInsideWorld();
-  }
-
-  // ============================================================
-  // DRAG END
-  // ============================================================
-
-  @override
-  void onDragEnd(
-      DragEndEvent event,
-      ) {
-    super.onDragEnd(event);
-
-    _isDragging = false;
-
-    stopMoving();
-
-    // MentalHealth stays where the user dropped it.
-  }
-
-  // ============================================================
-  // DRAG CANCEL
-  // ============================================================
-
-  @override
-  void onDragCancel(
-      DragCancelEvent event,
-      ) {
-    super.onDragCancel(event);
-
-    _isDragging = false;
-
-    stopMoving();
   }
 
   // ============================================================
@@ -194,77 +114,36 @@ class BirdComponent extends SpriteAnimationComponent
 
   @override
   void onCollisionStart(
-      Set<Vector2> intersectionPoints,
-      PositionComponent other,
-      ) {
-    super.onCollisionStart(
-      intersectionPoints,
-      other,
-    );
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
 
     // ----------------------------------------------------------
     // POND
     // ----------------------------------------------------------
 
     if (other is PondComponent) {
-      if (ai.currentState == BirdState.flying ||
-          ai.currentState == BirdState.walking) {
+      if (currentIntent == BirdAreaIntent.pond) {
         stopMoving();
-
-        ai.forceState(
-          BirdState.bathing,
-          duration: 5.0,
-        );
+        currentIntent = BirdAreaIntent.none;
+        ai.forceState(BirdState.bathing, duration: 5.0);
+      } else {
+        _avoidArea(other.position);
       }
-
-      return;
-    }
-
-    // ----------------------------------------------------------
-    // TREE
-    // ----------------------------------------------------------
-
-    if (other is TreeComponent) {
-      _handleTreeCollision(other);
-
       return;
     }
   }
 
-  // ============================================================
-  // TREE COLLISION
-  // ============================================================
+  void _avoidArea(Vector2 areaPosition) {
+    // Push the bird away from areas it's not supposed to be in
+    final Vector2 pushDirection = (position - areaPosition).normalized();
+    position += pushDirection * 15;
 
-  void _handleTreeCollision(
-      TreeComponent tree,
-      ) {
-    // Stop the mental_health immediately.
-    stopMoving();
-
-    // ----------------------------------------------------------
-    // PUSH BIRD AWAY FROM TREE
-    // ----------------------------------------------------------
-
-    final Vector2 difference =
-        position - tree.position;
-
-    if (difference.length > 0) {
-      final Vector2 pushDirection =
-      difference.normalized();
-
-      position += pushDirection * 15;
+    // If it was wandering, give it a new random target to get away
+    if (currentIntent == BirdAreaIntent.none) {
+      ai.chooseNewRandomTarget();
     }
-
-    // Keep mental_health inside world.
-    _keepInsideWorld();
-
-    // ----------------------------------------------------------
-    // TELL AI TO STOP
-    // ----------------------------------------------------------
-
-    ai.forceState(
-      BirdState.idle,
-    );
   }
 
   // ============================================================
@@ -275,9 +154,9 @@ class BirdComponent extends SpriteAnimationComponent
   void update(double dt) {
     super.update(dt);
 
-    // User is controlling the mental_health.
-    if (_isDragging) {
-      return;
+    // Sync profile from Provider
+    if (game.buildContext != null) {
+      currentProfile = game.buildContext!.read<BirdProvider>().birdProfile;
     }
 
     // ----------------------------------------------------------
@@ -285,18 +164,15 @@ class BirdComponent extends SpriteAnimationComponent
     // ----------------------------------------------------------
 
     if (_target != null) {
-      final Vector2 direction =
-      (_target! - position).normalized();
+      final Vector2 direction = (_target! - position).normalized();
 
-      final double distance =
-      position.distanceTo(_target!);
+      final double distance = position.distanceTo(_target!);
 
       if (distance < 5) {
         _target = null;
         _speed = 0;
       } else {
-        position +=
-            direction * _speed * dt;
+        position += direction * _speed * dt;
       }
     }
 
@@ -308,22 +184,18 @@ class BirdComponent extends SpriteAnimationComponent
   // ============================================================
 
   void _keepInsideWorld() {
-    final double halfWidth =
-        size.x / 2;
+    final double halfWidth = size.x / 2;
 
-    final double halfHeight =
-        size.y / 2;
+    final double halfHeight = size.y / 2;
 
     position.x = position.x.clamp(
       halfWidth,
-      GameConstants.worldWidth -
-          halfWidth,
+      GameConstants.worldWidth - halfWidth,
     );
 
     position.y = position.y.clamp(
       halfHeight,
-      GameConstants.worldHeight -
-          halfHeight,
+      GameConstants.worldHeight - halfHeight,
     );
   }
 
@@ -331,14 +203,7 @@ class BirdComponent extends SpriteAnimationComponent
   // AI TARGET
   // ============================================================
 
-  void setTarget(
-      Vector2 target,
-      double speed,
-      ) {
-    if (_isDragging) {
-      return;
-    }
-
+  void setTarget(Vector2 target, double speed) {
     _target = target;
     _speed = speed;
   }
@@ -359,11 +224,12 @@ class BirdComponent extends SpriteAnimationComponent
   // ============================================================
 
   void onFeed() {
-    stopMoving();
-
+    currentIntent = BirdAreaIntent.feeding;
     ai.forceState(
-      BirdState.eating,
-      duration: 3.0,
+      BirdState.flying,
+      target: Vector2(GameConstants.feedingX, GameConstants.feedingY),
+      speed: GameConstants.birdFlySpeed,
+      duration: 15.0,
     );
   }
 
@@ -372,18 +238,32 @@ class BirdComponent extends SpriteAnimationComponent
   // ============================================================
 
   void onBath() {
-    if (_isDragging) {
-      return;
-    }
-
+    currentIntent = BirdAreaIntent.pond;
     ai.forceState(
       BirdState.flying,
-      target: Vector2(
-        GameConstants.pondX,
-        GameConstants.pondY,
-      ),
-      speed: GameConstants.mental_healthFlySpeed,
-      duration: 10.0,
+      target: Vector2(GameConstants.pondX, GameConstants.pondY),
+      speed: GameConstants.birdFlySpeed,
+      duration: 15.0,
+    );
+  }
+
+  void onPlay() {
+    currentIntent = BirdAreaIntent.playground;
+    ai.forceState(
+      BirdState.walking,
+      target: Vector2(GameConstants.playX, GameConstants.playY),
+      speed: GameConstants.birdRunSpeed,
+      duration: 15.0,
+    );
+  }
+
+  void onSleep() {
+    currentIntent = BirdAreaIntent.sleeping;
+    ai.forceState(
+      BirdState.flying,
+      target: Vector2(GameConstants.sleepX, GameConstants.sleepY),
+      speed: GameConstants.birdFlySpeed,
+      duration: 15.0,
     );
   }
 }

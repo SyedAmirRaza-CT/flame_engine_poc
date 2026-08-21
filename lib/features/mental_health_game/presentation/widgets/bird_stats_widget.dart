@@ -1,39 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controllers/bird_controller.dart';
+import '../providers/bird_provider.dart';
 
 class BirdStatsWidget extends StatelessWidget {
   const BirdStatsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BirdController>(
-      builder: (context, controller, child) {
-        final mental_health = controller.mental_healthProfile;
+    return Consumer<BirdProvider>(
+      builder: (context, birdProvider, child) {
+        final bird = birdProvider.birdProfile;
 
-        if (mental_health == null) return const SizedBox.shrink();
+        if (bird == null) return const SizedBox.shrink();
 
-        return Card(
-          margin: const EdgeInsets.all(16),
-          color: Colors.white.withValues(alpha: 0.8),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  mental_health.name,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                _StatRow(label: '❤️ Happiness', value: mental_health.happiness, color: Colors.red),
-                _StatRow(label: '🍎 Hunger', value: mental_health.hunger, color: Colors.orange),
-                _StatRow(label: '⚡ Energy', value: mental_health.energy, color: Colors.yellow[700]!),
-                _StatRow(label: '💧 Cleanliness', value: mental_health.cleanliness, color: Colors.blue),
-                const SizedBox(height: 4),
-                Text('⭐ Level ${mental_health.level}', style: const TextStyle(fontWeight: FontWeight.w500)),
-              ],
+        return SizedBox(
+          width: 120, // Keep it narrow
+          child: Card(
+            margin: const EdgeInsets.all(8),
+            color: Colors.white.withValues(alpha: 0.7),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    bird.name,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  const Divider(height: 8, thickness: 0.5),
+                  _StatRow(icon: '❤️', value: bird.happiness, color: Colors.red),
+                  _StatRow(icon: '🍎', value: bird.hunger, color: Colors.orange),
+                  _StatRow(icon: '⚡', value: bird.energy, color: Colors.yellow[700]!),
+                  _StatRow(icon: '💧', value: bird.cleanliness, color: Colors.blue),
+                  const SizedBox(height: 2),
+                  Text('Lvl ${bird.level}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
+                ],
+              ),
             ),
           ),
         );
@@ -43,33 +48,30 @@ class BirdStatsWidget extends StatelessWidget {
 }
 
 class _StatRow extends StatelessWidget {
-  final String label;
+  final String icon;
   final double value;
   final Color color;
 
-  const _StatRow({required this.label, required this.value, required this.color});
+  const _StatRow({required this.icon, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 1.0),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label, style: const TextStyle(fontSize: 12)),
-              Text(value.toStringAsFixed(0), style: const TextStyle(fontSize: 12)),
-            ],
-          ),
-          const SizedBox(height: 2),
-          LinearProgressIndicator(
-            value: value / 100,
-            backgroundColor: Colors.grey[300],
-            color: color,
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
+          Text(icon, style: const TextStyle(fontSize: 10)),
+          const SizedBox(width: 4),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: value / 100,
+                backgroundColor: Colors.grey[300],
+                color: color,
+                minHeight: 4,
+              ),
+            ),
           ),
         ],
       ),

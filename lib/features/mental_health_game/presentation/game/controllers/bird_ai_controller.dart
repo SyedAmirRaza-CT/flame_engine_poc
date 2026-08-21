@@ -4,12 +4,11 @@ import 'package:flame/components.dart';
 
 import '../../../../../core/constants/constants.dart';
 import '../components/bird_component.dart';
-import '../components/seed_component.dart';
 
-enum BirdState { idle, walking, flying, bathing, eating, sleeping }
+enum BirdState { idle, walking, flying, bathing,}
 
 class BirdAIController extends Component {
-  final BirdComponent mental_health;
+  final BirdComponent bird;
 
   BirdState currentState = BirdState.idle;
 
@@ -17,7 +16,7 @@ class BirdAIController extends Component {
 
   final Random _random = Random();
 
-  BirdAIController(this.mental_health);
+  BirdAIController(this.bird);
 
   @override
   void update(double dt) {
@@ -33,29 +32,31 @@ class BirdAIController extends Component {
   }
 
   void _chooseNextState() {
+    // Only choose random behaviors if there is no specific intent from the player
+    if (bird.currentIntent != BirdAreaIntent.none) {
+      return; 
+    }
+    chooseNewRandomTarget();
+  }
+
+  void chooseNewRandomTarget() {
     final roll = _random.nextDouble();
 
     if (roll < 0.4) {
       // IDLE
       currentState = BirdState.idle;
-
       _stateTimer = 2.0 + _random.nextDouble() * 3.0;
-
-      mental_health.stopMoving();
+      bird.stopMoving();
     } else if (roll < 0.7) {
       // WALKING
       currentState = BirdState.walking;
-
       _stateTimer = 3.0 + _random.nextDouble() * 4.0;
-
-      _setRandomTarget(GameConstants.mental_healthWalkSpeed);
+      _setRandomTarget(GameConstants.birdWalkSpeed);
     } else {
       // FLYING
       currentState = BirdState.flying;
-
       _stateTimer = 4.0 + _random.nextDouble() * 5.0;
-
-      _setRandomTarget(GameConstants.mental_healthFlySpeed);
+      _setRandomTarget(GameConstants.birdFlySpeed);
     }
   }
 
@@ -65,71 +66,16 @@ class BirdAIController extends Component {
       _random.nextDouble() * GameConstants.worldHeight,
     );
 
-    mental_health.setTarget(target, speed);
+    bird.setTarget(target, speed);
   }
 
   void _executeState(double dt) {
-    if (currentState == BirdState.eating) {
-      _handleEating();
+    if (currentState == BirdState.flying) {
+
     }
   }
 
-  void _handleEating() {
-    final game = mental_health.game;
 
-    // No seeds available.
-    if (game.seeds.isEmpty) {
-      if (_stateTimer <= 0) {
-        _chooseNextState();
-      }
-
-      return;
-    }
-
-    // Find closest seed.
-    SeedComponent? closestSeed;
-    double closestDistance = double.infinity;
-
-    for (final seed in game.seeds) {
-      final distance = seed.position.distanceTo(mental_health.position);
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestSeed = seed;
-      }
-    }
-
-    if (closestSeed == null) {
-      return;
-    }
-
-    // MentalHealth reached seed.
-    if (closestDistance < 15) {
-      mental_health.stopMoving();
-
-      game.removeSeed(closestSeed);
-
-      // Peck/eating time.
-      _stateTimer = 1.0;
-
-      return;
-    }
-
-    // Move toward seed.
-    final target = mental_health.target;
-
-    if (target == null || target.distanceTo(closestSeed.position) > 5) {
-      mental_health.setTarget(closestSeed.position, GameConstants.mental_healthWalkSpeed);
-    }
-  }
-
-  void onSeedPlaced(Vector2 position) {
-    currentState = BirdState.eating;
-
-    _stateTimer = 20.0;
-
-    mental_health.stopMoving();
-  }
 
   void forceState(
     BirdState state, {
@@ -138,13 +84,12 @@ class BirdAIController extends Component {
     double duration = 5.0,
   }) {
     currentState = state;
-
     _stateTimer = duration;
 
     if (target != null) {
-      mental_health.setTarget(target, speed ?? GameConstants.mental_healthWalkSpeed);
+      bird.setTarget(target, speed ?? GameConstants.birdWalkSpeed);
     } else {
-      mental_health.stopMoving();
+      bird.stopMoving();
     }
   }
 }

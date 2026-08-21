@@ -69,6 +69,7 @@ flutter:
     - assets/images/
     - assets/images/birds/
     - assets/images/environment/
+    - assets/images/environment/background/
     - assets/images/trees/
     - assets/images/flowers/
     - assets/images/rocks/

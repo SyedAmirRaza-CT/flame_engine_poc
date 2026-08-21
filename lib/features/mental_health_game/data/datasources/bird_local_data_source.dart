@@ -16,7 +16,7 @@ class BirdLocalDataSourceImpl implements BirdLocalDataSource {
 
   @override
   Future<BirdProfileModel?> getBirdProfile() async {
-    final jsonString = sharedPreferences.getString(GameConstants.mental_healthProfileKey);
+    final jsonString = sharedPreferences.getString(GameConstants.birdProfileKey);
     if (jsonString != null) {
       return BirdProfileModel.fromJson(json.decode(jsonString));
     }
@@ -26,13 +26,13 @@ class BirdLocalDataSourceImpl implements BirdLocalDataSource {
   @override
   Future<void> saveBirdProfile(BirdProfileModel profile) async {
     await sharedPreferences.setString(
-      GameConstants.mental_healthProfileKey,
+      GameConstants.birdProfileKey,
       json.encode(profile.toJson()),
     );
   }
 
   @override
   Future<void> deleteBirdProfile() async {
-    await sharedPreferences.remove(GameConstants.mental_healthProfileKey);
+    await sharedPreferences.remove(GameConstants.birdProfileKey);
   }
 }
