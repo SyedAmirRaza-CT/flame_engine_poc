@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum BirdPersonality { calm, playful, curious, energetic }
+enum MentalHealthPersonality { calm, playful, curious, energetic }
 
 class BirdProfile extends Equatable {
   final String id;
@@ -12,7 +12,7 @@ class BirdProfile extends Equatable {
   final double cleanliness;
   final int level;
   final double experience;
-  final BirdPersonality personality;
+  final MentalHealthPersonality personality;
 
   const BirdProfile({
     required this.id,
@@ -24,7 +24,7 @@ class BirdProfile extends Equatable {
     this.cleanliness = 100.0,
     this.level = 1,
     this.experience = 0.0,
-    this.personality = BirdPersonality.curious,
+    this.personality = MentalHealthPersonality.curious,
   });
 
   BirdProfile copyWith({
@@ -35,7 +35,7 @@ class BirdProfile extends Equatable {
     double? cleanliness,
     int? level,
     double? experience,
-    BirdPersonality? personality,
+    MentalHealthPersonality? personality,
   }) {
     return BirdProfile(
       id: id,

@@ -25,9 +25,9 @@ class BirdProfileModel extends BirdProfile {
       cleanliness: (json['cleanliness'] as num).toDouble(),
       level: json['level'] as int,
       experience: (json['experience'] as num).toDouble(),
-      personality: BirdPersonality.values.firstWhere(
+      personality: MentalHealthPersonality.values.firstWhere(
         (e) => e.name == json['personality'],
-        orElse: () => BirdPersonality.curious,
+        orElse: () => MentalHealthPersonality.curious,
       ),
     );
   }

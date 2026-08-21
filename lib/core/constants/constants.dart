@@ -2,9 +2,9 @@ class GameConstants {
   static const double worldWidth = 2000;
   static const double worldHeight = 2000;
 
-  static const double birdWalkSpeed = 100.0;
-  static const double birdRunSpeed = 200.0;
-  static const double birdFlySpeed = 300.0;
+  static const double mental_healthWalkSpeed = 100.0;
+  static const double mental_healthRunSpeed = 200.0;
+  static const double mental_healthFlySpeed = 300.0;
 
   static const double minHappiness = 0.0;
   static const double maxHappiness = 100.0;
@@ -22,8 +22,8 @@ class GameConstants {
   static const double pondY = 1000.0;
   static const double pondRadius = 150.0;
 
-  static const String birdNameKey = 'bird_name';
-  static const String birdProfileKey = 'bird_profile';
+  static const String mental_healthNameKey = 'mental_health_name';
+  static const String mental_healthProfileKey = 'mental_health_profile';
 
   static const double pondWidth = 360;
   static const double pondHeight = 260;

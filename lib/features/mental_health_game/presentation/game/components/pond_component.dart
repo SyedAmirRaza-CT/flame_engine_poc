@@ -119,7 +119,7 @@ class PondComponent extends PositionComponent with CollisionCallbacks {
 
     // Water highlight
     final highlightPaint = Paint()
-      ..color = Colors.white.withOpacity(0.25)
+      ..color = Colors.white.withValues(alpha: 0.25)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
 

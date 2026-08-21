@@ -1,58 +1,64 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../game/bird_game.dart';
-import '../providers/bird_providers.dart';
+import 'package:provider/provider.dart';
+import '../game/mental_health_game.dart';
+import '../controllers/bird_controller.dart';
 import '../widgets/bird_stats_widget.dart';
 import '../widgets/game_ui_overlay.dart';
 
-class GamePage extends ConsumerStatefulWidget {
+class GamePage extends StatefulWidget {
   const GamePage({super.key});
 
   @override
-  ConsumerState<GamePage> createState() => _GamePageState();
+  State<GamePage> createState() => _GamePageState();
 }
 
-class _GamePageState extends ConsumerState<GamePage> {
-  late BirdGame _game;
+class _GamePageState extends State<GamePage> {
+  late MentalHealthGame _game;
 
   @override
   void initState() {
     super.initState();
-    _game = BirdGame();
+    _game = MentalHealthGame();
     
-    // Load bird profile
-    Future.microtask(() => ref.read(birdControllerProvider.notifier).loadBird());
+    // Load mental_health profile
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BirdController>().loadMentalHealth();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final bird = ref.watch(birdControllerProvider);
-
     return Scaffold(
       body: Stack(
         children: [
           GameWidget(game: _game, autofocus: true),
           
-          // // UI Components
-          // const SafeArea(
-          //   child: Align(
-          //     alignment: Alignment.topLeft,
-          //     child: BirdStatsWidget(),
-          //   ),
-          // ),
+          // UI Components
+          const SafeArea(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: BirdStatsWidget(),
+            ),
+          ),
           
           Align(
             alignment: Alignment.bottomCenter,
             child: GameUIOverlay(game: _game),
           ),
 
-          if (bird == null)
-            _NameEntryOverlay(
-              onSubmitted: (name) {
-                ref.read(birdControllerProvider.notifier).createBird(name);
-              },
-            ),
+          Consumer<BirdController>(
+            builder: (context, controller, child) {
+              if (controller.mental_healthProfile == null) {
+                return _NameEntryOverlay(
+                  onSubmitted: (name) {
+                    controller.createMentalHealth(name);
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
     );
@@ -84,7 +90,7 @@ class _NameEntryOverlayState extends State<_NameEntryOverlay> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "What's your bird's name?",
+                "What's your mental_health's name?",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),

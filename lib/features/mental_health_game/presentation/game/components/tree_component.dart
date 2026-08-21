@@ -20,7 +20,7 @@ class TreeComponent extends SpriteComponent
 
     // Collision area is only around the trunk.
     //
-    // We don't want the bird to collide with
+    // We don't want the mental_health to collide with
     // the transparent/top part of the tree image.
     add(
       RectangleHitbox(

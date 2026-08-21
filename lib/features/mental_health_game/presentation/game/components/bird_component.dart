@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
 import '../../../../../core/constants/constants.dart';
-import '../bird_game.dart';
+import '../mental_health_game.dart';
 import '../controllers/bird_ai_controller.dart';
 import 'pond_component.dart';
 import 'tree_component.dart';
@@ -12,7 +12,7 @@ class BirdComponent extends SpriteAnimationComponent
     with
         CollisionCallbacks,
         DragCallbacks,
-        HasGameReference<BirdGame> {
+        HasGameReference<MentalHealthGame> {
   Vector2? _target;
   double _speed = 0;
 
@@ -28,8 +28,8 @@ class BirdComponent extends SpriteAnimationComponent
     // BIRD HITBOX
     // ----------------------------------------------------------
     //
-    // Don't use the entire bird image as collision area.
-    // Keep the hitbox smaller so the bird doesn't hit trees
+    // Don't use the entire mental_health image as collision area.
+    // Keep the hitbox smaller so the mental_health doesn't hit trees
     // when its transparent/outer sprite area touches them.
     //
 
@@ -67,7 +67,7 @@ class BirdComponent extends SpriteAnimationComponent
 
   Future<void> _loadAnimations() async {
     final image = await game.images.load(
-      'birds/flying.png',
+      'mental_healths/flying.png',
     );
 
     const columns = 3;
@@ -170,7 +170,7 @@ class BirdComponent extends SpriteAnimationComponent
 
     stopMoving();
 
-    // Bird stays where the user dropped it.
+    // MentalHealth stays where the user dropped it.
   }
 
   // ============================================================
@@ -238,7 +238,7 @@ class BirdComponent extends SpriteAnimationComponent
   void _handleTreeCollision(
       TreeComponent tree,
       ) {
-    // Stop the bird immediately.
+    // Stop the mental_health immediately.
     stopMoving();
 
     // ----------------------------------------------------------
@@ -255,7 +255,7 @@ class BirdComponent extends SpriteAnimationComponent
       position += pushDirection * 15;
     }
 
-    // Keep bird inside world.
+    // Keep mental_health inside world.
     _keepInsideWorld();
 
     // ----------------------------------------------------------
@@ -275,7 +275,7 @@ class BirdComponent extends SpriteAnimationComponent
   void update(double dt) {
     super.update(dt);
 
-    // User is controlling the bird.
+    // User is controlling the mental_health.
     if (_isDragging) {
       return;
     }
@@ -382,7 +382,7 @@ class BirdComponent extends SpriteAnimationComponent
         GameConstants.pondX,
         GameConstants.pondY,
       ),
-      speed: GameConstants.birdFlySpeed,
+      speed: GameConstants.mental_healthFlySpeed,
       duration: 10.0,
     );
   }
